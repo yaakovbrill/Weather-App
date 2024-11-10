@@ -1,7 +1,7 @@
 # Weather App
 
 ## Description
-The Weather App allows users to check real-time weather information for any location. It utilizes external APIs to fetch weather data and display it in a user-friendly interface. This project requires a server environment (Apache) and Python for backend processing.
+The Weather App allows users to check real-time weather information for any city. It utilizes external APIs (Google Maps API & OpenWeatherMap API) to fetch location & weather data and displays it in a user-friendly interface. You can view the website at https://yaakovbrill.pythonanywhere.com/. If you would like to download it locally, then you will need a server environment (Apache) and Python for backend processing. Feel free to continue reading to install the project.
 
 ## Prerequisites
 
@@ -53,4 +53,4 @@ Follow these steps to run the app locally:
 The app should now be accessible locally and ready to fetch weather data.
 
 ## Usage
-Once the app is running, you can interact with it by entering the desired location (city or coordinates) to retrieve real-time weather information.
+Once the app is running, you can interact with it by entering the desired location (city) to retrieve real-time weather information.
