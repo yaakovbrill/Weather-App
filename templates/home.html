@@ -1,0 +1,227 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <title>WTax Weather</title>
+        
+        <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+        
+        <style>
+            #weatherData { 
+                margin-top: 20px;
+                display: flex;
+                flex-wrap: wrap;
+            }
+            
+            .weather-day {
+                flex: 0 0 calc(14.5% - 14px);
+                border: 1px solid #ccc;
+                border-radius: 5px;
+                padding: 10px;
+                margin: 10px;
+                background-color: #f9f9f9;
+            }
+            
+            .weather-day h3 {
+                margin-top: 0;
+            }
+            
+            .weather-day p {
+                margin: 5px 0;
+            }   
+            
+            #errorContainer {
+                display: none;
+                color: red;
+                font-weight: bold;
+            }
+        </style>
+    </head>
+    <body>
+        <h1>Weather App</h1>
+        
+        <form id="locationForm">
+            <label for="location">Enter City, Country (e.g. Johannesburg, South Africa)</label>
+            <input type="text" id="location" name="location" required>
+            <br>
+                <span>Choose forecast type:</span>
+                
+                <input type="radio" id="five-days" name="forecast_type" value="five_days" checked>
+                <label for="five-days">Five Days</label>
+                <input type="radio" id="48-hours" name="forecast_type" value="48_hours">
+                <label for="48-hours">48 Hours</label>
+            <br>
+            <button type="submit">Search</button>
+        </form>
+
+        <div id="errorContainer"></div>
+
+        <h3 id="resultHeading"></h3>
+        
+        <div id="weatherData">
+            <div id="weatherDays"></div>
+        </div>
+        
+        <script>
+            // Function to add weather objects dynamically
+            function addWeather(data, forecastType) {
+                var weatherDaysDiv = document.getElementById('weatherData');
+                weatherDaysDiv.innerHTML = ''; // Clear previous content
+
+                // Check if the "Five Days" radio button is selected
+                if (forecastType === 'five_days') {
+
+                    // Iterate over the weather data and create objects
+                    for (var i = 0; i < data.length; i++) {
+                        var weatherDay = data[i];
+                        var weatherDayDiv = document.createElement('div');
+                        weatherDayDiv.classList.add('weather-day');
+
+                        // Create HTML elements for date, min temperature, and max temperature
+                        var dateElement = document.createElement('h3');
+                        dateElement.textContent = 'Date: ' + weatherDay.date;
+
+                        var minTempElement = document.createElement('p');
+                        minTempElement.textContent = 'Min Temp: ' + weatherDay.minTemp + " °C";
+
+                        var maxTempElement = document.createElement('p');
+                        maxTempElement.textContent = 'Max Temp: ' + weatherDay.maxTemp + " °C";
+
+                        // Append the elements to the weather item container
+                        weatherDayDiv.appendChild(dateElement);
+                        weatherDayDiv.appendChild(minTempElement);
+                        weatherDayDiv.appendChild(maxTempElement);
+
+                        // Append the weather item to the weather data container
+                        weatherDaysDiv.appendChild(weatherDayDiv);
+                    }
+                }
+
+                else if (forecastType === '48_hours') {
+                    // Iterate over the weather data and create objects
+                    for (var i = 0; i < data.length; i++) {
+                        var weatherDay = data[i];
+                        var weatherDayDiv = document.createElement('div');
+                        weatherDayDiv.classList.add('weather-day');
+
+                        // Create HTML elements for date, time etc.
+                        var dateElement = document.createElement('h4');
+                        dateElement.textContent = 'Date: ' + weatherDay.date;
+
+                        var timeElement = document.createElement('h4');
+                        timeElement.textContent = 'Time: ' + weatherDay.time;
+
+                        var tempElement = document.createElement('p');
+                        tempElement.textContent = 'Temperature: ' + weatherDay.temp + " °C";
+
+                        var precipitationElement = document.createElement('p');
+                        precipitationElement.textContent = 'Precipitation: ' + weatherDay.precipitation +"%";
+
+                        var humidityElement = document.createElement('p');
+                        humidityElement.textContent = 'Humidity: ' + weatherDay.humidity + "%";
+
+                        var wind_speedElement = document.createElement('p');
+                        wind_speedElement.textContent = 'Wind: ' + weatherDay.wind_speed + " m/s";
+
+                        var descriptionElement = document.createElement('p');
+                        descriptionElement.textContent = 'Description: ' + weatherDay.description;
+
+                        // Append the elements to the weather item container
+                        weatherDayDiv.appendChild(dateElement);
+                        weatherDayDiv.appendChild(timeElement);
+                        weatherDayDiv.appendChild(tempElement);
+                        weatherDayDiv.appendChild(precipitationElement);
+                        weatherDayDiv.appendChild(humidityElement);
+                        weatherDayDiv.appendChild(wind_speedElement);
+                        weatherDayDiv.appendChild(descriptionElement);
+
+                        // Append the weather item to the weather data container
+                        weatherDaysDiv.appendChild(weatherDayDiv);
+                    }
+                }
+            }
+
+            // Function to update the heading with location
+            function updateHeading(location, forecast_type) {
+                var heading = document.getElementById('resultHeading');
+                var message = "";
+                if(forecast_type == "48_hours"){
+                    message = " for the Next 48 hours (UTC)";
+                }
+                else{
+                    message = " for the Next 5/6 days (UTC)";
+                }
+                heading.textContent = "Showing Results for " + location + message;
+            }
+
+            function displayErrorMessage(message) {
+                var errorContainer = document.getElementById('errorContainer');
+                errorContainer.textContent = message;
+                errorContainer.style.display = 'block';
+            }
+
+            function clearErrorMessage() {
+                var errorContainer = document.getElementById('errorContainer');
+                errorContainer.textContent = '';
+                errorContainer.style.display = 'none';
+            }
+
+            function simulateError() {
+                var errorMessage = 'Please enter a valid city.';
+                displayErrorMessage(errorMessage);
+            }
+
+            function clearWeather() {
+                //clear heading
+                var errorContainer = document.getElementById('resultHeading');
+                errorContainer.textContent = '';
+
+                //clear weather
+                var errorContainer = document.getElementById('weatherData');
+                errorContainer.textContent = '';
+            }
+
+            $(document).ready(function() { //when the html has loaded
+                // Handle form submission
+                $('#locationForm').submit(function(event) { //when the form is submitted
+                    event.preventDefault(); //prevent the page from refreshing, or new url
+                    
+                    // Get the input variables 
+                    var location = $('#location').val();
+                    var forecast_type = $('input[name="forecast_type"]:checked').val();
+                    
+                    // Send an AJAX request to app.py
+                    $.ajax({
+                        url: '/get_weather_info',
+                        type: 'POST',
+                        data: { location: location, forecast_type, forecast_type},
+                        success: function(response) {
+
+                            //get the converted_location
+                            converted_location = response.pop()["converted_location"];
+                            
+                            if(converted_location != ""){ //valid location
+
+                                //clear error message
+                                clearErrorMessage(); 
+
+                                //heading with selected location and forecast type
+                                updateHeading(converted_location, forecast_type); 
+
+                                //display the weather on html
+                                addWeather(response, forecast_type); 
+                            }
+                            else{ //invalid location
+                                clearWeather()
+                                simulateError()
+                                console.log("bad location request");
+                            }
+                        },
+                        error: function() {
+                            console.log('Error occurred during the request.');
+                        }
+                    });
+                });
+            });
+        </script>
+    </body>
+</html>
